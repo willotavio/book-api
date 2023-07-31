@@ -15,7 +15,7 @@ const uri = `mongodb+srv://${MONGODB_USER}:${MONGODB_PASS}@tibeckstao.fbl1vyz.mo
 mongoose.connect(uri, {useNewUrlParser: true, useUnifiedTopology: true});
 
 app.get('/', (req, res) => {
-    res.json({cu: "cu"});
+    res.json({});
 });
 
 const authorRouter = require('./src/routes/authorRouter');

@@ -1,31 +1,10 @@
 const router = require('express').Router();
 const Author = require('../models/Author');
+const authorController = require('../controllers/authorController');
 
-router.get('/', async (req, res) => {
-    const authors = await Author.find();
-    res.status(200).json(authors);
-});
-
-router.post('/', async (req, res) => {
-    const { name, dateOfBirth } = req.body;
-    if(name && dateOfBirth){
-        let dob = Date.parse(dateOfBirth);
-        const author = {
-            name,
-            dateOfBirth: dob
-        }
-        try{
-            await Author.create(author);
-            res.sendStatus(200);
-        }
-        catch(err){
-            console.log(err);
-            res.sendStatus(500);
-        }
-    }
-    else{
-        res.sendStatus(400);
-    }
-});
+router.get('/', authorController.findAuthors);
+router.get('/:authorId', authorController.findAuthorById);
+router.post('/', authorController.addAuthor);
+router.delete('/:authorId', authorController.deleteAuthor);
 
 module.exports = router;
