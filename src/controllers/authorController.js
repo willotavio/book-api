@@ -10,11 +10,16 @@ class authorController{
     async findAuthorById(req, res){
         const { authorId } = req.params;
         if(authorId){
-            const author = await Author.findById(authorId);
-            if(author){
-                res.status(200).json(author);
+            try{
+                const author = await Author.findById(authorId);
+                if(author){
+                    res.status(200).json(author);
+                }
+                else{
+                    res.sendStatus(404);
+                }
             }
-            else{
+            catch(err){
                 res.sendStatus(404);
             }
         }
@@ -49,16 +54,11 @@ class authorController{
         const { authorId } = req.params;
         if(authorId){
             try{
-                const exists = await Author.findByIdAndDelete(authorId);
-                if(exists){
-                    res.sendStatus(200);
-                }
-                else{
-                    res.sendStatus(404);
-                }
+                await Author.findByIdAndDelete(authorId);
+                res.sendStatus(200);
             }
             catch(err){
-                res.sendStatus(500);
+                res.sendStatus(404);
             }
         }
         else{

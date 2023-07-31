@@ -1,5 +1,4 @@
 const router = require('express').Router();
-const Author = require('../models/Author');
 const authorController = require('../controllers/authorController');
 
 router.get('/', authorController.findAuthors);
