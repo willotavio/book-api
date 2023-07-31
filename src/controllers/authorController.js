@@ -50,6 +50,35 @@ class authorController{
         }
     }
 
+    async updateAuthor(req, res){
+        const { authorId } = req.params;
+        const { name, dateOfBirth } = req.body;
+        if(authorId){
+            const author = {}
+            if(name){
+                author.name = name;
+            }
+            if(dateOfBirth){
+                author.dateOfBirth = dateOfBirth;
+            }
+            try{
+                const exists = await Author.findByIdAndUpdate(authorId, author);
+                if(exists){
+                    res.sendStatus(200);
+                }
+                else{
+                    res.sendStatus(404);
+                }
+            }
+            catch(err){
+                res.sendStatus(404);
+            }
+        }
+        else{
+            res.sendStatus(400);
+        }
+    }
+
     async deleteAuthor(req, res){
         const { authorId } = req.params;
         if(authorId){

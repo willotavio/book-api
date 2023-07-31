@@ -59,6 +59,57 @@ class bookController{
         }
     }
 
+    async updateBook(req, res){
+        const { bookId } = req.params;
+        const { title, synopsis, releaseDate, authorId } = req.body;
+
+        if(bookId){
+            try{
+                await Book.findById(bookId);
+    
+                const book = {}
+    
+                if(authorId){
+                    try{
+                        const authorExists = await Author.findById(authorId);
+                        book.author = authorExists;
+                    }
+                    catch(err){
+                        res.status(404).json({message: "Author not found"});
+                        return;
+                    }
+                }
+                if(title){
+                    book.title = title;    
+                }
+                if(synopsis){
+                    book.synopsis = synopsis;
+                }
+                if(releaseDate){
+                    let rDate = Date.parse(releaseDate);
+                    book.releaseDate = rDate;
+                }
+    
+                try{
+                    await Book.findByIdAndUpdate(bookId, book);
+                    res.sendStatus(200);
+                }
+                catch(err){
+                    res.sendStatus(500);
+                }
+    
+            }
+            catch(err){
+                res.status(404).json({message: "Book not found"});
+                return;
+            }
+        }
+        else{
+            res.sendStatus(400);
+        }
+
+    }
+
     async deleteBook(req, res){
         const { bookId } = req.params;
         if(bookId){
