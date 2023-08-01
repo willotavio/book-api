@@ -1,25 +1,20 @@
-const Author = require('../models/Author');
+const authorService = require('../services/authorService');
 
 class authorController{
 
     async findAuthors(req, res){
-        const authors = await Author.find();
-        res.status(200).json(authors);
+        const authors = await authorService.findAuthors();
+        res.status(200).json(authors.authors);
     }
 
     async findAuthorById(req, res){
         const { authorId } = req.params;
         if(authorId){
-            try{
-                const author = await Author.findById(authorId);
-                if(author){
-                    res.status(200).json(author);
-                }
-                else{
-                    res.sendStatus(404);
-                }
+            const result = await authorService.findAuthorById(authorId);
+            if(result.status){
+                res.status(200).json(result.author);
             }
-            catch(err){
+            else{
                 res.sendStatus(404);
             }
         }
@@ -31,17 +26,11 @@ class authorController{
     async addAuthor(req, res){
         const { name, dateOfBirth } = req.body;
         if(name && dateOfBirth){
-            let dob = Date.parse(dateOfBirth);
-            const author = {
-                name,
-                dateOfBirth: dob
-            }
-            try{
-                await Author.create(author);
+            const result = await authorService.addAuthor(name, dateOfBirth);
+            if(result.status){
                 res.sendStatus(200);
             }
-            catch(err){
-                console.log(err);
+            else{
                 res.sendStatus(500);
             }
         }
@@ -54,23 +43,11 @@ class authorController{
         const { authorId } = req.params;
         const { name, dateOfBirth } = req.body;
         if(authorId){
-            const author = {}
-            if(name){
-                author.name = name;
+            const result = await authorService.updateAuthor(authorId, name, dateOfBirth);
+            if(result.status){
+                res.sendStatus(200);
             }
-            if(dateOfBirth){
-                author.dateOfBirth = dateOfBirth;
-            }
-            try{
-                const exists = await Author.findByIdAndUpdate(authorId, author);
-                if(exists){
-                    res.sendStatus(200);
-                }
-                else{
-                    res.sendStatus(404);
-                }
-            }
-            catch(err){
+            else{
                 res.sendStatus(404);
             }
         }
@@ -82,11 +59,11 @@ class authorController{
     async deleteAuthor(req, res){
         const { authorId } = req.params;
         if(authorId){
-            try{
-                await Author.findByIdAndDelete(authorId);
+            const result = await authorService.deleteAuthor(authorId);
+            if(result.status){
                 res.sendStatus(200);
             }
-            catch(err){
+            else{
                 res.sendStatus(404);
             }
         }
