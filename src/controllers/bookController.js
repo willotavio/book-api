@@ -1,26 +1,20 @@
-const Book = require('../models/Book');
-const Author = require('../models/Author');
+const bookService = require('../services/bookService');
 
 class bookController{
 
     async findBooks(req, res){
-        const books = await Book.find();
-        res.status(200).json(books);
+        const books = await bookService.findBooks();
+        res.status(200).json(books.books);
     }
 
     async findBookById(req, res){
         const { bookId } = req.params;
         if(bookId){
-            try{
-                const book = await Book.findById(bookId);
-                if(book){
-                    res.status(200).json(book);
-                }
-                else{
-                    res.sendStatus(404);
-                }
+            const book = await bookService.findBookById(bookId);
+            if(book.status){
+                res.status(200).json(book.book);    
             }
-            catch(err){
+            else{
                 res.sendStatus(404);
             }
         }
@@ -32,26 +26,15 @@ class bookController{
     async addBook(req, res){
         const { title, synopsis, releaseDate, authorId } = req.body;
         if(title && synopsis && releaseDate && authorId){
-            let authorExists = await Author.findById(authorId);
-            if(authorExists){
-                let rDate = Date.parse(releaseDate);
-                let book = {
-                    title,
-                    synopsis,
-                    releaseDate: rDate,
-                    author: authorExists
-                }
-                try{
-                    await Book.create(book);
-                    res.sendStatus(201);
-                }
-                catch(err){
-                    console.log(err);
-                    res.sendStatus(500);
-                }
+            const result = await bookService.addBook(title, synopsis, releaseDate, authorId);
+            if(result.status){
+                res.sendStatus(201);
+            }
+            else if(result.message){
+                res.status(404).json(result.message);
             }
             else{
-                res.status(404).json({message: "Author not found"});
+                res.sendStatus(500);
             }
         }
         else{
@@ -62,46 +45,16 @@ class bookController{
     async updateBook(req, res){
         const { bookId } = req.params;
         const { title, synopsis, releaseDate, authorId } = req.body;
-
         if(bookId){
-            try{
-                await Book.findById(bookId);
-    
-                const book = {}
-    
-                if(authorId){
-                    try{
-                        const authorExists = await Author.findById(authorId);
-                        book.author = authorExists;
-                    }
-                    catch(err){
-                        res.status(404).json({message: "Author not found"});
-                        return;
-                    }
-                }
-                if(title){
-                    book.title = title;    
-                }
-                if(synopsis){
-                    book.synopsis = synopsis;
-                }
-                if(releaseDate){
-                    let rDate = Date.parse(releaseDate);
-                    book.releaseDate = rDate;
-                }
-    
-                try{
-                    await Book.findByIdAndUpdate(bookId, book);
-                    res.sendStatus(200);
-                }
-                catch(err){
-                    res.sendStatus(500);
-                }
-    
+            const result = await bookService.updateBook(bookId, title, synopsis, releaseDate, authorId);
+            if(result.status){
+                res.sendStatus(200);
             }
-            catch(err){
-                res.status(404).json({message: "Book not found"});
-                return;
+            else if(result.message){
+                res.status(404).json(result.message);
+            }
+            else{
+                res.sendStatus(500);
             }
         }
         else{
@@ -113,16 +66,11 @@ class bookController{
     async deleteBook(req, res){
         const { bookId } = req.params;
         if(bookId){
-            try{
-                const exists = await Book.findByIdAndDelete(bookId);
-                if(exists){
-                    res.sendStatus(200);
-                }
-                else{
-                    res.sendStatus(404);
-                }
+            const result = await bookService.deleteBook(bookId);
+            if(result.status){
+                res.sendStatus(200);
             }
-            catch(err){
+            else{
                 res.sendStatus(404);
             }
         }
